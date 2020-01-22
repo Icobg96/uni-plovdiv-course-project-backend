@@ -31,6 +31,11 @@ public class AuthTokenEntity {
     @UpdateTimestamp
     private Date updateAt;
 
+    public AuthTokenEntity(){}
+    public AuthTokenEntity(final String token){
+        this.token = token;
+    }
+
     public Long getId() {
         return id;
     }
@@ -61,5 +66,15 @@ public class AuthTokenEntity {
 
     public void setUpdateAt(Date updateAt) {
         this.updateAt = updateAt;
+    }
+
+    public static AuthToken toDto(final AuthTokenEntity authTokenEntity){
+        if(authTokenEntity == null){
+            return null;
+        }
+        final AuthToken authToken = new AuthToken();
+        authToken.setId(authTokenEntity.getId());
+        authToken.setToken(authTokenEntity.getToken());
+        return authToken;
     }
 }

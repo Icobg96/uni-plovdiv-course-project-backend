@@ -3,6 +3,7 @@ package com.social.network.model;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Created on 4.12.2019 г.
@@ -104,5 +106,21 @@ public class UserEntity {
 
     public void setRoles(Set<RoleEntity> roles) {
         this.roles = roles;
+    }
+    public static UserEntity toEntity(final User user){
+        if(user == null){
+            return null;
+        }
+        final UserEntity userEntity = new UserEntity();
+        userEntity.setUsername(user.getUsername());
+        userEntity.setEmail(user.getEmail());
+        userEntity.setPassword(user.getPassword());
+        if(!CollectionUtils.isEmpty(user.getRoles())){
+            userEntity.setRoles(user.getRoles()
+                    .stream()
+                    .map(RoleEntity::toEntity)
+                    .collect(Collectors.toSet()));
+        }
+        return userEntity;
     }
 }

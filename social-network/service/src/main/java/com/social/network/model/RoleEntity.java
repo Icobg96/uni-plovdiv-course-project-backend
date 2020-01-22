@@ -62,4 +62,13 @@ public class RoleEntity {
     public void setUpdateAt(Date updateAt) {
         this.updateAt = updateAt;
     }
+    public static RoleEntity toEntity(final Role role){
+        if(role == null){
+            return null;
+        }
+        final RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setId(role.getId());
+        roleEntity.setAuthority(role.getAuthority());
+        return roleEntity;
+    }
 }
