@@ -2,16 +2,22 @@ package com.social.network.service;
 
 import com.social.network.model.AuthToken;
 import com.social.network.model.AuthTokenEntity;
+import com.social.network.model.RoleEntity;
 import com.social.network.model.UserEntity;
 import com.social.network.repository.AuthTokenRepository;
 import com.social.network.repository.UserRepository;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,23 +48,29 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     }
 
     @Override
+    @Transactional
     public Optional<User> findByToken(final String token) {
         if(StringUtils.isEmpty(token)){
             return Optional.empty();
         }
         final String clearToken = token.replace("Bearer","").trim();
-        final AuthTokenEntity optionalAuthToken = authTokenRepository.findByToken(clearToken);
-        if(optionalAuthToken != null){
-            final Optional<UserEntity> optionalUser = userRepository.findByAuthTokenId(optionalAuthToken.getId());
+        final Optional<AuthTokenEntity> optionalAuthToken = authTokenRepository.findByToken(clearToken);
+        if(optionalAuthToken.isPresent()){
+            final Optional<UserEntity> optionalUser = userRepository.findByAuthTokenId(optionalAuthToken.get().getId());
             if(optionalUser.isPresent()) {
                 final User user = new User(optionalUser.get().getUsername(), optionalUser.get().getPassword(), true, true, true, true,
-                        optionalUser.get().getRoles()
-                                .stream()
-                                .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
-                                .collect(Collectors.toSet()));
+                        mapRolToGrantedAuthority(optionalUser.get().getRoles()));
                 return Optional.of(user);
             }
         }
         return Optional.empty();
+    }
+    private Set<GrantedAuthority> mapRolToGrantedAuthority(final Set<RoleEntity> roles){
+        if(CollectionUtils.isEmpty(roles)){
+            return Collections.emptySet();
+        }
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
+                .collect(Collectors.toSet());
     }
 }

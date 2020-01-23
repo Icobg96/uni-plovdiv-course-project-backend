@@ -41,7 +41,7 @@ public class UserEntity {
     private Date updateAt;
     @OneToOne
     private AuthTokenEntity authToken;
-    @OneToMany
+    @OneToMany(targetEntity = RoleEntity.class)
     private Set<RoleEntity> roles;
 
     public Long getId() {
